@@ -1,0 +1,72 @@
+{% extends 'world_happiness/base.html' %}
+
+{% block container %}
+
+<head>
+    <title>Subir CSV</title>
+    <style>
+        body {
+            font-family: Arial;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 450px;
+            margin: 40px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #aaa;
+        }
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background: #2E86AB;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 15px;
+        }
+        .msg {
+            margin-top: 15px;
+            color: green;
+            text-align: center;
+            font-weight: bold;
+        }
+        .error {
+            margin-top: 15px;
+            color: red;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Subir CSV de Países</h2>
+
+    {% if msg %}
+        <div class="msg">{{ msg }}</div>
+    {% endif %}
+    {% if error %}
+        <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label>Seleccionar archivo CSV:</label>
+        <input type="file" name="csv_file" accept=".csv" required>
+
+        <button type="submit">Subir y Cargar</button>
+    </form>
+</div>
+
+</body>
+
+{% endblock %}

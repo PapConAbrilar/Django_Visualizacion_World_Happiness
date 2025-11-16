@@ -1,0 +1,64 @@
+{% extends 'world_happiness/base.html' %}
+
+{% block container %}
+
+<script src="https://cdn.plot.ly/plotly-3.2.0.min.js"></script>
+<div id="bar-chart">
+
+    <script>
+        
+        const trustData = {{ trust_data|safe }};
+
+        const data = [{
+            x: trustData['Trust (Government Corruption)'],
+            name: 'Trust (Government Corruption)',
+            type: 'histogram',
+            marker: {
+                color: '#F19F01',
+                opacity: 0.6,
+                line: {
+                    color: '#F16F00',
+                    width: 2.5
+                }
+            },
+            xbins: {
+                end: 0.58,
+                size: 0.02,
+                start: 0
+            }
+            // xaxis: 'x1',
+            // yaxis: 'y1',
+            // legendgroup: 'group1', 
+            // showlegend: false, 
+
+        }];
+        const layout = {
+            width: 1400,
+            height: 600,
+            bargap: 0.2,
+            title: {
+                    text: 'Histograma para Trust (Government Corruption)'
+                },
+            margin: { l: 50, r: 50, t: 70, b: 40 },
+            plot_bgcolor: 'rgba(30,30,30,0.66)',
+            paper_bgcolor: 'rgba(30,30,30,0.66)',
+            font: {
+            color: '#FFFFFF'
+            },
+            yaxis:{
+                ticklen: 10
+            },
+            showlegend: true,
+            legend: {
+                x: 0.91,
+                y: 0.97,
+            }
+        };
+        Plotly.newPlot('bar-chart', data, layout, {responsive: true});
+
+
+    </script>
+
+</div>
+
+{% endblock %}

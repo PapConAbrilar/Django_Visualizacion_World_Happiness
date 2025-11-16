@@ -1,0 +1,175 @@
+{% extends 'world_happiness/base.html' %}
+
+{% block container %}
+<h1>Relación entre el poder económico per cápita y la felicidad</h1>
+    <br>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+
+<style>
+    #chartContainer {
+        width: 100%;
+        height: 70vh; 
+        position: relative;
+        background-color: #14191b;
+    }
+</style>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <label for="regionSelect" class="form-label">Filtrar por Región</label>
+        <select id="regionSelect" class="form-select">
+            </select>
+    </div>
+    <div class="col-md-6 d-flex align-items-end">
+        <button id="resetZoomBtn" class="btn btn-secondary">Resetear Zoom</button>
+    </div>
+</div>
+
+<div id="chartContainer">
+    <canvas id="myScatterChart"></canvas>
+</div>
+
+{{ paises|json_script:"data-paises" }}
+{{ gdp|json_script:"data-gdp" }}
+{{ felicidad|json_script:"data-felicidad" }}
+{{ regiones|json_script:"data-regiones" }}
+{{ regiones_unicas|json_script:"data-regiones-unicas" }} 
+
+<script>
+    // --- LEER DATOS DE DJANGO ---
+    const paises = JSON.parse(document.getElementById('data-paises').textContent);
+    const gdp = JSON.parse(document.getElementById('data-gdp').textContent);
+    const felicidad = JSON.parse(document.getElementById('data-felicidad').textContent);
+    const regiones = JSON.parse(document.getElementById('data-regiones').textContent);
+    const regionesUnicas = JSON.parse(document.getElementById('data-regiones-unicas').textContent);
+
+    // --- PREPARAR DATOS (ahora con 'region') ---
+    const allData = [];
+    for (let i = 0; i < paises.length; i++) {
+        allData.push({
+            x: gdp[i],
+            y: felicidad[i],
+            pais: paises[i],
+            region: regiones[i]
+        });
+    }
+    
+    // Registrar el plugin de zoom
+    Chart.register(ChartZoom);
+
+    // --- CONFIGURACIÓN DEL GRÁFICO ---
+    
+    // *** CORRECCIÓN #1 ***
+    // Se corrigió getContext('d') a getContext('2d')
+    const ctx = document.getElementById('myScatterChart').getContext('2d');
+    
+    const myChart = new Chart(ctx, { 
+        type: 'scatter', 
+        data: {
+            datasets: [
+                {
+                    label: 'Países', 
+                    data: allData, // Empezamos mostrando TODOS los datos
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)', 
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false, 
+            
+            // *** CORRECCIÓN #2 ***
+            // Se restauró la configuración completa de 'plugins'
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Felicidad vs GDP',
+                    font: { size: 22 }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(context) { return ''; },
+                        label: function(context) {
+                            const d = context.raw;
+                            return `País: ${d.pais}`;
+                        }
+                    }
+                },
+                zoom: {
+                    zoom: {
+                        wheel: { enabled: true },
+                        pinch: { enabled: true },
+                        mode: 'xy',
+                    },
+                    pan: {
+                        enabled: true,
+                        mode: 'xy',
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: { display: true, text: 'Economía (GDP per Capita)', font: { size: 22 }, padding:10},
+                    grid:{
+                        color: 'rgba(150,150,150,0.3)',
+                        borderColor:'#FFFFFF'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Índice de Felicidad',
+                        font: { size: 22},
+                        padding:10,
+                    },
+                    grid:{
+                        color: 'rgba(150,150,150,0.3)',
+                        borderColor:'#FFFFFF'
+                    }
+                },
+
+            }
+        }
+    });
+
+    const selectElement = document.getElementById('regionSelect');
+    
+    let allOption = document.createElement('option');
+    allOption.value = 'Todos';
+    allOption.text = 'Todos';
+    selectElement.appendChild(allOption);
+
+    regionesUnicas.forEach(region => {
+        let option = document.createElement('option');
+        option.value = region;
+        option.text = region;
+        selectElement.appendChild(option);
+    });
+
+
+    selectElement.addEventListener('change', (e) => {
+        const selectedRegion = e.target.value;
+        const data = allData;
+        const filteredData = [];
+
+        for (const d of data) {
+            if (selectedRegion === "Todos" || d.region === selectedRegion) {
+                filteredData.push(d);
+            }
+        }
+        
+        myChart.data.datasets[0].data = filteredData;
+        myChart.update();
+    });
+
+
+    document.getElementById('resetZoomBtn').addEventListener('click', () => {
+        myChart.resetZoom();
+    });
+
+</script>
+
+{% endblock %}

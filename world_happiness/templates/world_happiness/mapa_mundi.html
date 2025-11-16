@@ -1,0 +1,42 @@
+{% extends 'world_happiness/base.html' %}
+
+{% block container %}
+
+<div class="main-content">
+    <h1>Indicadores por País</h1>
+    <br>
+    <div class="metric-selector">
+        <label for="metric-select">Selecciona una métrica:</label>
+        <select id="metric-select" onchange="showMetric(this.value)">
+            {% for metrica in metricas %}
+            <option value="metric-{{ forloop.counter }}">{{ metrica }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <br>
+    <div class="graphs-container">
+        {% for metrica, graph_html in graphs.items %}
+        <div id="metric-{{ forloop.counter }}" class="metric-graph" 
+                style="display: {% if forloop.first %}block{% else %}none{% endif %};">
+            {{ graph_html|safe }}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function showMetric(metricId) {
+        var graphs = document.getElementsByClassName('metric-graph');
+        for (var i = 0; i < graphs.length; i++) {
+            graphs[i].style.display = 'none';
+        }
+        
+        var selectedGraph = document.getElementById(metricId);
+        if (selectedGraph) {
+            selectedGraph.style.display = 'block';
+        }
+    }
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends 'world_happiness/base.html' %}
+
+{% block container %}
+
+<head>
+    <title>Agregar País</title>
+    <style>
+        form {
+            width: 400px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #aaa;
+        }
+        button {
+            margin-top: 15px;
+            padding: 10px;
+            width: 100%;
+            background: #4CAF50;
+            border: none;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .msg {
+            width: 400px;
+            margin: 10px auto;
+            text-align: center;
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+{% if msg %}
+    <div class="msg">{{ msg }}</div>
+{% endif %}
+
+<form method="POST">
+    {% csrf_token %}
+    <h2>Agregar País Manualmente</h2>
+
+    <label>Nombre del país</label>
+    <input type="text" name="nombre" required>
+
+    <label>Región</label>
+    <select name="id_region" required>
+        {% for r in regiones %}
+            <option value="{{ r.id_region }}">{{ r.nombre }}</option>
+        {% endfor %}
+    </select>
+
+    <label>Happiness Score</label>
+    <input type="number" step="0.00001" name="happiness_score" required>
+
+    <label>Standard Error</label>
+    <input type="number" step="0.00001" name="standard_error" required>
+
+    <label>Economy</label>
+    <input type="number" step="0.00001" name="economy" required>
+
+    <label>Family</label>
+    <input type="number" step="0.00001" name="family" required>
+
+    <label>Health</label>
+    <input type="number" step="0.00001" name="health" required>
+
+    <label>Freedom</label>
+    <input type="number" step="0.00001" name="freedom" required>
+
+    <label>Trust</label>
+    <input type="number" step="0.00001" name="trust" required>
+
+    <label>Generosity</label>
+    <input type="number" step="0.00001" name="generosity" required>
+
+    <label>Dystopia</label>
+    <input type="number" step="0.00001" name="dystopia" required>
+
+    <button type="submit">Agregar País</button>
+</form>
+
+</body>
+
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends 'world_happiness/base.html' %}
+
+{% block container %}
+<h1>Relación entre parámetros y la felicidad de los países</h1>
+    <br>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+
+<style>
+.chart-container {
+  background-color: #141c20; /* AliceBlue */
+}
+</style>
+
+<div class="chart-container">
+        <canvas id="correlationChart"></canvas>
+</div>
+
+    <script>
+
+        try {
+            Chart.register(ChartDataLabels);
+        } catch (e) {
+            console.error("Error al registrar chartjs-plugin-datalabels", e);
+        }
+
+        const labels = {{ labels_data|safe }};
+        const data = {{ datac_data|safe }};
+        const colors = {{ colors_data|safe }};
+
+        const ctx = document.getElementById('correlationChart').getContext('2d');
+        
+        const correlationChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Coeficiente de Correlación',
+                    data: data,
+                    backgroundColor: colors, 
+                    borderColor: colors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                layout: {
+                    padding: 2
+                },
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Correlacion con parámetro "Happiness Score"',
+                        font: {
+                            size: 22,
+                            weight: 'bold'
+                        }
+                    },
+                    legend: {
+                        display: false 
+                    },
+                    datalabels: {
+                        color: 'white',
+                        anchor: 'center', 
+                        align: 'center',
+                        font: {
+                            weight: 'bold'
+                        },
+                        formatter: function(value, context) {
+                            return value.toFixed(3);
+                        }
+                    },
+                    tooltip: {
+                         callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y.toFixed(3); 
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks:{font:{size:20}},
+                        min: 0,
+                        max: 1.0,
+                        title: {
+                            display: true,
+                            text: 'Coeficiente de Correlación',
+                            font: {
+                                weight: 'bold',
+                                size: 20
+                            },
+                            padding: 20
+                        }
+                    },
+                    x: {
+                        ticks:{
+                            autoskip: false,
+                            maxRotation: 90,
+                            minRotation: 45,
+                            font:{size:18},
+                        },
+                        title: {
+                            display: true,
+                            text: 'Indicadores de Felicidad',
+                            font: {
+                                weight: 'bold',
+                                size: 20
+                            },
+                            // padding: 15
+                        }
+
+
+
+                    }
+                }
+            }
+        });
+    </script>
+
+
+{% endblock %}
