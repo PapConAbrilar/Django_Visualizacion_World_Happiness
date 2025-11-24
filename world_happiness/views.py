@@ -107,7 +107,6 @@ def happiness(request):
         })
 
 
-
 def economy(request):
     paises_qs = Pais.objects.select_related('id_region').all()
 
@@ -127,7 +126,6 @@ def economy(request):
     }
 
     return render(request, 'world_happiness/economy.html', context)
-
 
 
 def trust(request):
@@ -249,14 +247,9 @@ def dashboard_interactivo(request):
         'datos_json': json.dumps(datos_list),
         'regiones': list(regiones),
         'metricas': metricas,
-        'active_page': 'dashboard'
+        'active_page':'dashboard'
     }
     return render(request, 'world_happiness/dashboard.html', context)
-# bibliografia rapida
-"""
-https://www.coding2go.com/sidebar-menu
-"""
-
 
 
 def agregar_pais(request):
@@ -269,7 +262,8 @@ def agregar_pais(request):
         if Pais.objects.filter(nombre=nombre_pais).exists():
             messages.error(request, f"El país '{nombre_pais}' ya existe en la base de datos.")
             return render(request, "world_happiness/agregar_pais.html", {
-                "regiones": regiones
+                "regiones": regiones,
+                "active_page":"agregar_pais"
             })
         
         try:
@@ -302,7 +296,8 @@ def agregar_pais(request):
             messages.error(request, f"Error inesperado: {str(e)}")
 
     return render(request, "world_happiness/agregar_pais.html", {
-        "regiones": regiones
+        "regiones": regiones,
+        "active_page":"agregar_pais"
     })
 
 
@@ -346,11 +341,12 @@ def cargar_csv(df):
     
     return paises_creados, paises_actualizados
 
+
 def agregar_pais_csv(request):
     if request.method == "POST":
         if "csv_file" not in request.FILES:
             messages.error(request, "Debe seleccionar un archivo.")
-            return render(request, "world_happiness/agregar_pais_csv.html")
+            return render(request, "world_happiness/agregar_pais_csv.html", {"active_page":"agregar_pais_csv"})
 
         try:
             csv_file = request.FILES["csv_file"]
@@ -358,7 +354,7 @@ def agregar_pais_csv(request):
             # Validar extensión del archivo
             if not csv_file.name.endswith('.csv'):
                 messages.error(request, "El archivo debe ser un CSV.")
-                return render(request, "world_happiness/agregar_pais_csv.html")
+                return render(request, "world_happiness/agregar_pais_csv.html", {"active_page":"agregar_pais_csv"})
             
             df = pd.read_csv(csv_file)
 
@@ -371,7 +367,7 @@ def agregar_pais_csv(request):
 
             if not all(col in df.columns for col in columnas_esperadas):
                 messages.error(request, "El CSV no tiene el formato correcto.")
-                return render(request, "world_happiness/agregar_pais_csv.html")
+                return render(request, "world_happiness/agregar_pais_csv.html", {"active_page":"agregar_pais_csv"})
 
             paises_creados, paises_actualizados = cargar_csv(df)
             
@@ -384,9 +380,10 @@ def agregar_pais_csv(request):
 
         except Exception as e:
             messages.error(request, f"Error procesando el archivo: {str(e)}")
-            return render(request, "world_happiness/agregar_pais_csv.html")
+            return render(request, "world_happiness/agregar_pais_csv.html", {"active_page":"agregar_pais_csv"})
 
-    return render(request, "world_happiness/agregar_pais_csv.html")
+    return render(request, "world_happiness/agregar_pais_csv.html", {"active_page":"agregar_pais_csv"})
+
 
 def inicio(request):
     return render(request, 'inicio.html')

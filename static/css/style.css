@@ -280,3 +280,8 @@ main p{
 #resetZoomBtn{
   width:10%
 }
+
+#sidebar li a .account{
+  margin-top: auto;
+  color:#4CAF50;
+}
