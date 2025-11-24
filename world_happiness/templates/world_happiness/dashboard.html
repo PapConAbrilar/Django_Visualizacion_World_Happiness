@@ -1,0 +1,674 @@
+<!-- world_happiness/dashboard.html -->
+{% extends 'world_happiness/base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header del Dashboard -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-4 text-center">Dashboard Interactivo - World Happiness 2015</h1>
+            <p class="text-center text-muted">Explora y compara métricas de felicidad entre países y regiones</p>
+        </div>
+    </div>
+
+    <!-- Filtros Interactivos -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card bg-dark text-white">
+                <div class="card-header">
+                    <h5 class="mb-0">🔍 Filtros de Exploración</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="selectRegion" class="form-label">Filtrar por Región:</label>
+                            <select class="form-select" id="selectRegion">
+                                <option value="all">Todas las Regiones</option>
+                                {% for region in regiones %}
+                                <option value="{{ region }}">{{ region }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="selectMetric" class="form-label">Métrica Principal:</label>
+                            <select class="form-select" id="selectMetric">
+                                {% for metrica in metricas %}
+                                <option value="{{ metrica }}">{{ metrica }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="selectTopN" class="form-label">Top N Países:</label>
+                            <select class="form-select" id="selectTopN">
+                                <option value="5">Top 5</option>
+                                <option value="10" selected>Top 10</option>
+                                <option value="20">Top 20</option>
+                                <option value="all">Todos</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label for="rangeHappiness" class="form-label">Rango de Felicidad: 
+                                <span id="happinessRangeValue">4.0 - 7.5</span>
+                            </label>
+                            <div id="rangeHappiness" class="range-slider"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch mt-4">
+                                <input class="form-check-input" type="checkbox" id="toggleCorrelations" checked>
+                                <label class="form-check-label" for="toggleCorrelations">
+                                    Mostrar Correlaciones
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjetas de Métricas Principales -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title"> Felicidad Promedio</h6>
+                            <h3 id="avgHappiness" class="card-text">5.38</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-smile fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title"> GDP Promedio</h6>
+                            <h3 id="avgGDP" class="card-text">0.85</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-chart-line fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title"> Esperanza de Vida</h6>
+                            <h3 id="avgHealth" class="card-text">0.63</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-heartbeat fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title"> Libertad Promedio</h6>
+                            <h3 id="avgFreedom" class="card-text">0.38</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-dove fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos Principales -->
+    <div class="row mb-4">
+        <!-- Gráfico de Barras - Top Países -->
+        <div class="col-lg-6">
+            <div class="card bg-dark text-white h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"> Top Países por Métrica</h5>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-light active" data-sort="asc">Ascendente</button>
+                        <button class="btn btn-outline-light" data-sort="desc">Descendente</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="barChart" style="height: 400px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mapa Interactivo -->
+        <div class="col-lg-6">
+            <div class="card bg-dark text-white h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"> Mapa de Distribución</h5>
+                </div>
+                <div class="card-body">
+                    <div id="mapChart" style="height: 400px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos Secundarios -->
+    <div class="row mb-4">
+        <!-- Scatter Plot - Correlaciones -->
+        <div class="col-lg-6">
+            <div class="card bg-dark text-white h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"> Correlación entre Métricas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="selectXAxis" class="form-label">Eje X:</label>
+                            <select class="form-select" id="selectXAxis">
+                                {% for metrica in metricas %}
+                                <option value="{{ metrica }}" {% if metrica == 'Economy (GDP per Capita)' %}selected{% endif %}>{{ metrica }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="selectYAxis" class="form-label">Eje Y:</label>
+                            <select class="form-select" id="selectYAxis">
+                                {% for metrica in metricas %}
+                                <option value="{{ metrica }}" {% if metrica == 'Happiness Score' %}selected{% endif %}>{{ metrica }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div id="scatterPlot" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Heatmap de Correlaciones -->
+        <div class="col-lg-6">
+            <div class="card bg-dark text-white h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"> Mapa de Calor - Correlaciones</h5>
+                </div>
+                <div class="card-body">
+                    <div id="heatmap" style="height: 350px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Datos Detallados -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-dark text-white">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">📊 Datos Detallados</h5>
+                    <button class="btn btn-sm btn-outline-light" id="exportData">
+                        <i class="fas fa-download"></i> Exportar CSV
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover" id="dataTable">
+                            <thead>
+                                <tr>
+                                    <th>País</th>
+                                    <th>Región</th>
+                                    <th>Felicidad</th>
+                                    <th>GDP</th>
+                                    <th>Familia</th>
+                                    <th>Salud</th>
+                                    <th>Libertad</th>
+                                    <th>Generosidad</th>
+                                    <th>Confianza</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                <!-- Los datos se cargarán dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para detalles del país -->
+<div class="modal fade" id="countryModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title" id="countryModalTitle">Detalles del País</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="countryModalBody">
+                <!-- Contenido dinámico -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Spinner -->
+<div id="loadingSpinner" class="d-none position-fixed top-50 start-50 translate-middle">
+    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+        <span class="visually-hidden">Cargando...</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Datos globales - se cargarán desde Django
+const happinessData = {{ datos_json|safe }};
+const regions = {{ regiones|safe }};
+const metrics = {{ metricas|safe }};
+
+// Configuración inicial del dashboard
+let currentFilters = {
+    region: 'all',
+    metric: 'Happiness Score',
+    topN: 10,
+    happinessRange: [4.0, 7.5],
+    showCorrelations: true
+};
+
+// Inicialización cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    initializeDashboard();
+    setupEventListeners();
+    loadInitialData();
+});
+
+function initializeDashboard() {
+    // Inicializar sliders
+    initRangeSlider();
+    
+    // Cargar gráficos iniciales
+    updateBarChart();
+    updateMapChart();
+    updateScatterPlot();
+    updateHeatmap();
+    updateDataTable();
+    updateMetricCards();
+}
+
+function setupEventListeners() {
+    // Listeners para filtros
+    document.getElementById('selectRegion').addEventListener('change', function(e) {
+        currentFilters.region = e.target.value;
+        updateAllCharts();
+    });
+
+    document.getElementById('selectMetric').addEventListener('change', function(e) {
+        currentFilters.metric = e.target.value;
+        updateAllCharts();
+    });
+
+    document.getElementById('selectTopN').addEventListener('change', function(e) {
+        currentFilters.topN = e.target.value;
+        updateBarChart();
+        updateDataTable();
+    });
+
+    // Listeners para ordenamiento
+    document.querySelectorAll('[data-sort]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('[data-sort]').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            updateBarChart();
+        });
+    });
+
+    // Listeners para scatter plot
+    document.getElementById('selectXAxis').addEventListener('change', updateScatterPlot);
+    document.getElementById('selectYAxis').addEventListener('change', updateScatterPlot);
+
+    // Exportar datos
+    document.getElementById('exportData').addEventListener('click', exportToCSV);
+}
+
+function initRangeSlider() {
+    // Implementar slider de rango con alguna librería como noUiSlider
+    // Por simplicidad, aquí un placeholder
+    const slider = document.getElementById('rangeHappiness');
+    // Inicializar slider con noUiSlider o similar
+}
+
+function updateAllCharts() {
+    showLoading();
+    
+    setTimeout(() => {
+        updateBarChart();
+        updateMapChart();
+        updateScatterPlot();
+        updateHeatmap();
+        updateDataTable();
+        updateMetricCards();
+        hideLoading();
+    }, 500);
+}
+
+function updateBarChart() {
+    // Filtrar y ordenar datos
+    const filteredData = filterData();
+    const sortedData = sortData(filteredData, currentFilters.metric);
+    const displayData = currentFilters.topN === 'all' ? sortedData : sortedData.slice(0, currentFilters.topN);
+
+    // Crear gráfico de barras con Plotly
+    const trace = {
+        x: displayData.map(d => d.Country),
+        y: displayData.map(d => d[currentFilters.metric]),
+        type: 'bar',
+        marker: {
+            color: displayData.map(d => getColorByValue(d[currentFilters.metric]))
+        }
+    };
+
+    const layout = {
+        title: `Top ${displayData.length} Países - ${currentFilters.metric}`,
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        font: { color: 'white' },
+        xaxis: { tickangle: -45 },
+        yaxis: { title: currentFilters.metric }
+    };
+
+    Plotly.newPlot('barChart', [trace], layout, { responsive: true });
+}
+
+function updateMapChart() {
+    const filteredData = filterData();
+    
+    // Crear mapa coroplético
+    const data = [{
+        type: 'choropleth',
+        locations: filteredData.map(d => d.iso_alpha),
+        z: filteredData.map(d => d[currentFilters.metric]),
+        text: filteredData.map(d => d.Country),
+        colorscale: 'Viridis',
+        autocolorscale: false,
+        reversescale: false,
+        marker: {
+            line: {
+                color: 'rgb(180,180,180)',
+                width: 0.5
+            }
+        }
+    }];
+
+    const layout = {
+        title: `Distribución Mundial - ${currentFilters.metric}`,
+        geo: {
+            showframe: false,
+            showcoastlines: false,
+            projection: {
+                type: 'natural earth'
+            },
+            bgcolor: 'rgba(0,0,0,0)'
+        },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        font: { color: 'white' }
+    };
+
+    Plotly.newPlot('mapChart', data, layout, { responsive: true });
+}
+
+function updateScatterPlot() {
+    const xMetric = document.getElementById('selectXAxis').value;
+    const yMetric = document.getElementById('selectYAxis').value;
+    const filteredData = filterData();
+
+    const trace = {
+        x: filteredData.map(d => d[xMetric]),
+        y: filteredData.map(d => d[yMetric]),
+        mode: 'markers',
+        type: 'scatter',
+        text: filteredData.map(d => d.Country),
+        marker: {
+            size: 8,
+            color: filteredData.map(d => d['Happiness Score']),
+            colorscale: 'Viridis',
+            showscale: true
+        }
+    };
+
+    const layout = {
+        title: `${yMetric} vs ${xMetric}`,
+        xaxis: { title: xMetric },
+        yaxis: { title: yMetric },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        font: { color: 'white' }
+    };
+
+    Plotly.newPlot('scatterPlot', [trace], layout, { responsive: true });
+}
+
+function updateHeatmap() {
+    // Calcular matriz de correlaciones
+    const correlationMatrix = calculateCorrelationMatrix();
+    
+    const trace = {
+        z: correlationMatrix,
+        x: metrics,
+        y: metrics,
+        type: 'heatmap',
+        colorscale: 'RdBu',
+        zmin: -1,
+        zmax: 1
+    };
+
+    const layout = {
+        title: 'Matriz de Correlaciones',
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        font: { color: 'white' }
+    };
+
+    Plotly.newPlot('heatmap', [trace], layout, { responsive: true });
+}
+
+function updateDataTable() {
+    const filteredData = filterData();
+    const sortedData = sortData(filteredData, currentFilters.metric);
+    const displayData = currentFilters.topN === 'all' ? sortedData : sortedData.slice(0, currentFilters.topN);
+
+    const tableBody = document.getElementById('tableBody');
+    tableBody.innerHTML = '';
+
+    displayData.forEach(country => {
+        const row = document.createElement('tr');
+        row.style.cursor = 'pointer';
+        row.onclick = () => showCountryDetails(country);
+        
+        row.innerHTML = `
+            <td>${country.Country}</td>
+            <td>${country.Region}</td>
+            <td>${country['Happiness Score'].toFixed(3)}</td>
+            <td>${country['Economy (GDP per Capita)'].toFixed(3)}</td>
+            <td>${country.Family.toFixed(3)}</td>
+            <td>${country['Health (Life Expectancy)'].toFixed(3)}</td>
+            <td>${country.Freedom.toFixed(3)}</td>
+            <td>${country.Generosity.toFixed(3)}</td>
+            <td>${country['Trust (Government Corruption)'].toFixed(3)}</td>
+        `;
+        
+        tableBody.appendChild(row);
+    });
+}
+
+function updateMetricCards() {
+    const filteredData = filterData();
+    
+    // Calcular promedios
+    const avgHappiness = filteredData.reduce((sum, d) => sum + d['Happiness Score'], 0) / filteredData.length;
+    const avgGDP = filteredData.reduce((sum, d) => sum + d['Economy (GDP per Capita)'], 0) / filteredData.length;
+    const avgHealth = filteredData.reduce((sum, d) => sum + d['Health (Life Expectancy)'], 0) / filteredData.length;
+    const avgFreedom = filteredData.reduce((sum, d) => sum + d.Freedom, 0) / filteredData.length;
+
+    // Actualizar tarjetas
+    document.getElementById('avgHappiness').textContent = avgHappiness.toFixed(2);
+    document.getElementById('avgGDP').textContent = avgGDP.toFixed(2);
+    document.getElementById('avgHealth').textContent = avgHealth.toFixed(2);
+    document.getElementById('avgFreedom').textContent = avgFreedom.toFixed(2);
+}
+
+// Funciones auxiliares
+function filterData() {
+    let filtered = happinessData;
+    
+    if (currentFilters.region !== 'all') {
+        filtered = filtered.filter(d => d.Region === currentFilters.region);
+    }
+    
+    // Aplicar filtro de rango de felicidad
+    filtered = filtered.filter(d => 
+        d['Happiness Score'] >= currentFilters.happinessRange[0] && 
+        d['Happiness Score'] <= currentFilters.happinessRange[1]
+    );
+    
+    return filtered;
+}
+
+function sortData(data, metric) {
+    const isAscending = document.querySelector('[data-sort].active').dataset.sort === 'asc';
+    return [...data].sort((a, b) => {
+        return isAscending ? a[metric] - b[metric] : b[metric] - a[metric];
+    });
+}
+
+function calculateCorrelationMatrix() {
+    // Implementar cálculo de matriz de correlación
+    return metrics.map(() => metrics.map(() => Math.random() * 2 - 1));
+}
+
+function getColorByValue(value) {
+    // Mapear valores a colores para el gráfico de barras
+    const colors = ['#ff6b6b', '#ffa726', '#ffee58', '#9ccc65', '#26a69a'];
+    const index = Math.min(Math.floor(value), colors.length - 1);
+    return colors[index];
+}
+
+function showCountryDetails(country) {
+    document.getElementById('countryModalTitle').textContent = `📊 ${country.Country}`;
+    
+    const modalBody = document.getElementById('countryModalBody');
+    modalBody.innerHTML = `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Información Básica</h6>
+                <p><strong>Región:</strong> ${country.Region}</p>
+                <p><strong>Ranking de Felicidad:</strong> ${country['Happiness Rank']}</p>
+            </div>
+            <div class="col-md-6">
+                <h6>Métricas Principales</h6>
+                <p><strong>Puntaje de Felicidad:</strong> ${country['Happiness Score'].toFixed(3)}</p>
+                <p><strong>GDP per Capita:</strong> ${country['Economy (GDP per Capita)'].toFixed(3)}</p>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-12">
+                <h6>Desglose Detallado</h6>
+                <div class="progress mb-2" style="height: 20px;">
+                    <div class="progress-bar bg-success" style="width: ${country['Economy (GDP per Capita)'] * 100}%">
+                        Economía: ${country['Economy (GDP per Capita)'].toFixed(3)}
+                    </div>
+                </div>
+                <div class="progress mb-2" style="height: 20px;">
+                    <div class="progress-bar bg-info" style="width: ${country.Family * 100}%">
+                        Familia: ${country.Family.toFixed(3)}
+                    </div>
+                </div>
+                <div class="progress mb-2" style="height: 20px;">
+                    <div class="progress-bar bg-warning" style="width: ${country['Health (Life Expectancy)'] * 100}%">
+                        Salud: ${country['Health (Life Expectancy)'].toFixed(3)}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    new bootstrap.Modal(document.getElementById('countryModal')).show();
+}
+
+function exportToCSV() {
+    const filteredData = filterData();
+    const headers = ['Country', 'Region', 'Happiness Score', 'Economy (GDP per Capita)', 'Family', 'Health (Life Expectancy)', 'Freedom', 'Generosity', 'Trust (Government Corruption)'];
+    
+    let csvContent = headers.join(',') + '\n';
+    filteredData.forEach(row => {
+        const values = headers.map(header => row[header]);
+        csvContent += values.join(',') + '\n';
+    });
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'world_happiness_data.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
+function showLoading() {
+    document.getElementById('loadingSpinner').classList.remove('d-none');
+}
+
+function hideLoading() {
+    document.getElementById('loadingSpinner').classList.add('d-none');
+}
+
+// Cargar datos iniciales (simulado)
+function loadInitialData() {
+    // En una implementación real, esto vendría de Django
+    console.log('Dashboard cargado con', happinessData.length, 'registros');
+}
+</script>
+
+<style>
+.range-slider {
+    background: #2E86AB;
+    height: 5px;
+    border-radius: 5px;
+    margin: 10px 0;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.table-responsive {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.progress {
+    background-color: #2c3e50;
+}
+
+.metric-card {
+    border-left: 4px solid #2E86AB;
+}
+
+#loadingSpinner {
+    z-index: 9999;
+}
+</style>
+{% endblock %}
