@@ -24,6 +24,66 @@ body{
   grid-template-columns: auto 1fr;
 }
 
+/* ALL OF THIS xd */
+.container form {
+    width: 400px;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+}
+.container label {
+    font-weight: bold;
+    display: block;
+    margin-top: 10px;
+}
+.container input, select {
+    width: 95%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 5px;
+    color:#e6e6ef;
+    background-color: #222533;
+    border: 1px solid #11121a;
+    box-sizing: content-box;
+}
+.container button{
+    margin-top: 15px;
+    padding: 10px;
+    width: 100%;
+    background: #4CAF50;
+    border: none;
+    color: white;
+    font-size: 15px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+.container .msg {
+    width: 400px;
+    margin: 10px auto;
+    text-align: center;
+    color: green;
+    font-weight: bold;
+}
+
+.container h2{
+  margin-top: 0.5em;
+}
+
+
+/* Hide default arrows in all browsers */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+/* NORMAL THING HERE */
 #sidebar{
   box-sizing: border-box;
   height: 100vh;
@@ -61,8 +121,8 @@ body{
     fill: var(--accent-clr);
   }
 }
-
-#sidebar a, #sidebar .dropdown-btn, #sidebar .logo{
+/* SIDEBAR BUTTON HERE */
+#sidebar a, #sidebar .dropdown-btn, #sidebar .logo, #sidebar button{
   border-radius: .5em;
   padding: .85em;
   text-decoration: none;
@@ -71,7 +131,7 @@ body{
   align-items: center;
   gap: 1em;
 }
-.dropdown-btn{
+.dropdown-btn, #sidebar button{
   width: 100%;
   text-align: left;
   background: none;
@@ -83,10 +143,12 @@ body{
   flex-shrink: 0;
   fill: var(--text-clr);
 }
-#sidebar a span, #sidebar .dropdown-btn span{
+/* SAME THING HERE */
+#sidebar a span, #sidebar .dropdown-btn span, #sidebar button{
   flex-grow: 1;
 }
-#sidebar a:hover, #sidebar .dropdown-btn:hover{
+/* HOVER HEREE */
+#sidebar a:hover, #sidebar .dropdown-btn:hover, #sidebar button:hover{
   background-color: var(--hover-clr);
 }
 #sidebar .sub-menu{
@@ -140,7 +202,7 @@ main p{
   margin-bottom: 20px;
   padding: min(3em, 15%);
 
-  h2, p { margin-top: 1em }
+  h2, p { margin-top: 0.5em }
 }
 
 @media(max-width: 800px){
@@ -213,4 +275,8 @@ main p{
       }
     }
   }
+}
+
+#resetZoomBtn{
+  width:10%
 }

@@ -4,70 +4,11 @@
 
 <head>
     <title>Agregar País</title>
-    <style>
-        form {
-            width: 400px;
-            margin: auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-        }
-        label {
-            font-weight: bold;
-            display: block;
-            margin-top: 10px;
-        }
-        input, select {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            border-radius: 5px;
-            border: 1px solid #aaa;
-        }
-        button {
-            margin-top: 15px;
-            padding: 10px;
-            width: 100%;
-            background: #4CAF50;
-            border: none;
-            color: white;
-            font-size: 15px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .messages {
-            width: 400px;
-            margin: 10px auto;
-            text-align: center;
-        }
-        .alert {
-            padding: 10px;
-            border-radius: 5px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .alert-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-    </style>
 </head>
 <body>
 
-{% if messages %}
-<div class="messages">
-    {% for message in messages %}
-    <div class="alert alert-{{ message.tags }}">
-        {{ message }}
-    </div>
-    {% endfor %}
-</div>
+{% if msg %}
+    <div class="msg">{{ msg }}</div>
 {% endif %}
 
 <form method="POST">
@@ -75,55 +16,43 @@
     <h2>Agregar País Manualmente</h2>
 
     <label>Nombre del país</label>
-    <input type="text" name="nombre" value="{{ request.POST.nombre|default:'' }}" required>
+    <input type="text" name="nombre" required>
 
     <label>Región</label>
     <select name="id_region" required>
-        <option value="">Seleccione una región</option>
         {% for r in regiones %}
-            <option value="{{ r.id_region }}" 
-                    {% if request.POST.id_region == r.id_region|stringformat:"s" %}selected{% endif %}>
-                {{ r.nombre }}
-            </option>
+            <option value="{{ r.id_region }}">{{ r.nombre }}</option>
         {% endfor %}
     </select>
 
     <label>Happiness Score</label>
-    <input type="number" step="0.00001" name="happiness_score" 
-           value="{{ request.POST.happiness_score|default:'' }}" required>
+    <input type="number" step="0.00001" name="happiness_score" required>
 
     <label>Standard Error</label>
-    <input type="number" step="0.00001" name="standard_error" 
-           value="{{ request.POST.standard_error|default:'0' }}" required>
+    <input type="number" step="0.00001" name="standard_error" required>
 
     <label>Economy</label>
-    <input type="number" step="0.00001" name="economy" 
-           value="{{ request.POST.economy|default:'' }}" required>
+    <input type="number" step="0.00001" name="economy" required>
 
     <label>Family</label>
-    <input type="number" step="0.00001" name="family" 
-           value="{{ request.POST.family|default:'' }}" required>
+    <input type="number" step="0.00001" name="family" required>
 
     <label>Health</label>
-    <input type="number" step="0.00001" name="health" 
-           value="{{ request.POST.health|default:'' }}" required>
+    <input type="number" step="0.00001" name="health" required>
 
     <label>Freedom</label>
-    <input type="number" step="0.00001" name="freedom" 
-           value="{{ request.POST.freedom|default:'' }}" required>
+    <input type="number" step="0.00001" name="freedom" required>
 
     <label>Trust</label>
-    <input type="number" step="0.00001" name="trust" 
-           value="{{ request.POST.trust|default:'0' }}" required>
+    <input type="number" step="0.00001" name="trust" required>
 
     <label>Generosity</label>
-    <input type="number" step="0.00001" name="generosity" 
-           value="{{ request.POST.generosity|default:'' }}" required>
+    <input type="number" step="0.00001" name="generosity" required>
 
     <label>Dystopia</label>
-    <input type="number" step="0.00001" name="dystopia" 
-           value="{{ request.POST.dystopia|default:'' }}" required>
+    <input type="number" step="0.00001" name="dystopia" required>
 
+    <label></label>
     <button type="submit">Agregar País</button>
 </form>
 

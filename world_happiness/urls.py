@@ -9,4 +9,5 @@ urlpatterns = [
     path('mapa_mundi/', views.mapa_mundi, name='mapa_mundi'),
     path('agregar_pais/', views.agregar_pais, name="agregar_pais"),
     path('agregar_pais_csv/', views.agregar_pais_csv, name="agregar_pais_csv"),
+    path('dashboard/', views.dashboard_interactivo, name='dashboard')
 ]
