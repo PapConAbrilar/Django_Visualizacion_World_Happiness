@@ -5,13 +5,14 @@ from pycountry_convert import country_name_to_country_alpha3 # pip install pycou
 from django.shortcuts import render
 import numpy as np
 import pandas as pd
+import json
 from world_happiness.utils import cargar_csv
 from decimal import Decimal
 from world_happiness.models import Pais, Region
 from decimal import Decimal, InvalidOperation
 from django.contrib import messages
 from django.shortcuts import redirect
-import json
+from django.contrib.auth.decorators import login_required
 
 datos = pd.read_csv('world_happiness/2015.csv')
 
@@ -179,12 +180,13 @@ def mapa_mundi(request):
     graphs = {}
     for metrica in metricas:
         fig = px.choropleth(datos,
-                           locations="iso_alpha",
-                           color=metrica,
-                           hover_name="Country",
-                           color_continuous_scale=px.colors.sequential.Plasma,
-                           title=f"{metrica} por País",
-                           scope="world")
+            locations="iso_alpha",
+            color=metrica,
+            hover_name="Country",
+            color_continuous_scale=px.colors.sequential.Plasma,
+            title=f"{metrica} por País",
+            scope="world"
+            )
         fig.update_layout(
             margin=dict(l=30, r=315, t=50, b=30),
             autosize=False,
@@ -385,3 +387,11 @@ def agregar_pais_csv(request):
             return render(request, "world_happiness/agregar_pais_csv.html")
 
     return render(request, "world_happiness/agregar_pais_csv.html")
+
+def inicio(request):
+    return render(request, 'inicio.html')
+
+
+@login_required
+def panel_privado(request):
+    return render(request, 'panel_privado.html')
