@@ -11,6 +11,7 @@ from world_happiness.models import Pais, Region
 from decimal import Decimal, InvalidOperation
 from django.contrib import messages
 from django.shortcuts import redirect
+import json
 
 datos = pd.read_csv('world_happiness/2015.csv')
 
@@ -214,16 +215,37 @@ def index(request):
 
 
 # 'SORPRENDAME'
+
 def dashboard_interactivo(request):
+    # Obtener todos los países con sus regiones
+    paises = Pais.objects.select_related('id_region').all()
     
-    # Datos para filtros
-    regiones = datos['Region'].unique().tolist()
+    # Preparar los datos para el gráfico
+    datos_list = []
+    for pais in paises:
+        datos_list.append({
+            'Country': pais.nombre,
+            'Region': pais.id_region.nombre,
+            'Happiness Score': float(pais.happiness_score),
+            'Economy (GDP per Capita)': float(pais.economy),
+            'Family': float(pais.family),
+            'Health (Life Expectancy)': float(pais.health),
+            'Freedom': float(pais.freedom),
+            'Trust (Government Corruption)': float(pais.trust) if pais.trust else 0,
+            'Generosity': float(pais.generosity),
+            'Dystopia Residual': float(pais.dystopia),
+        })
+    
+    # Obtener regiones únicas
+    regiones = Region.objects.values_list('nombre', flat=True).distinct()
+    
     metricas = ['Happiness Score', 'Economy (GDP per Capita)', 'Family', 
                 'Health (Life Expectancy)', 'Freedom', 'Trust (Government Corruption)', 
                 'Generosity']
     
     context = {
-        'regiones': regiones,
+        'datos_json': json.dumps(datos_list),
+        'regiones': list(regiones),
         'metricas': metricas,
         'active_page': 'dashboard'
     }
