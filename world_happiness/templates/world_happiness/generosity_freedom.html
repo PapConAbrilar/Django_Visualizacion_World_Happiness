@@ -1,7 +1,8 @@
 {% extends 'world_happiness/base.html' %}
 
 {% block container %}
-
+<h1>Relación entre generosidad y libertad</h1>
+    <br>
 <script src="https://cdn.plot.ly/plotly-3.2.0.min.js"></script>
 <div id="combined-bar-chart">
 
@@ -81,28 +82,28 @@
             yaxes: ['y', 'y'], 
             xpadding: 0,
         },
-        // Titles (matching subplot_titles)
+
         annotations: [
             {
                 text: '10 países más felices',
-                x: 0.22, // Approximate center of first subplot (0 to 0.5)
-                y: 1.0,
+                x: 0.22,
+                y: 1.05,
                 yref: 'paper',
                 xref: 'paper',
                 showarrow: false,
-                font: { size: 16, color:'#FFFFFF' }
+                font: { size: 20, color:'#FFFFFF' }
             },
             {
                 text: '10 países menos felices',
-                x: 0.77, // Approximate center of second subplot (0.5 to 1.0)
-                y: 1.0,
+                x: 0.77,
+                y: 1.05,
                 yref: 'paper',
                 xref: 'paper',
                 showarrow: false,
-                font: { size: 16, color:'#FFFFFF' }
+                font: { size: 20, color:'#FFFFFF'}
             }
         ],
-      
+
         xaxis: {
             domain: [0.03, 0.495], 
             tickangle: 45,
@@ -119,14 +120,15 @@
                 standoff: 0
             }
         },
-       
+
         yaxis: {
             title: 'Score', 
         },
         plot_bgcolor: 'rgba(30,30,30,0.66)',
         paper_bgcolor: 'rgba(30,30,30,0.66)',
         font: {
-        color: '#FFFFFF'
+        color: '#FFFFFF',
+        size:16
         },
         showlegend: true,
         legend: {
