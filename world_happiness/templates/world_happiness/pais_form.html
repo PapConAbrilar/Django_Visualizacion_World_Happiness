@@ -1,0 +1,38 @@
+{% extends 'world_happiness/base.html' %}
+
+{% block container %}
+<section class="crud-header">
+  <h1>{% if is_edit %}Editar{% else %}Gestionar{% endif %} país</h1>
+  <p>Actualiza los indicadores asociados a {{ pais.nombre }}.</p>
+</section>
+
+{% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+      <li class="{{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+<form method="post" class="single-form" novalidate>
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+  {% for field in form %}
+  <div class="form-group">
+    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+    {{ field }}
+    {% if field.help_text %}
+      <small>{{ field.help_text }}</small>
+    {% endif %}
+    {% for error in field.errors %}
+      <span class="error">{{ error }}</span>
+    {% endfor %}
+  </div>
+  {% endfor %}
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+    <a href="{% url 'pais_list' %}" class="btn btn-secondary">Cancelar</a>
+  </div>
+</form>
+{% endblock %}
+
