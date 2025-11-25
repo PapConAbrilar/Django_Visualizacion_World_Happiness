@@ -2,33 +2,15 @@
 
 {% block container %}
 
-<head>
-    <title>Subir CSV</title>
-    <style>
-        .msg {
-            margin-top: 15px;
-            color: green;
-            text-align: center;
-            font-weight: bold;
-        }
-        .error {
-            margin-top: 15px;
-            color: red;
-            text-align: center;
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
-
 <div class="container">
     <h2>Subir CSV de Países</h2>
 
-    {% if msg %}
-        <div class="msg">{{ msg }}</div>
-    {% endif %}
-    {% if error %}
-        <div class="error">{{ error }}</div>
+    {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
     {% endif %}
 
     <form method="POST" enctype="multipart/form-data">
@@ -39,7 +21,5 @@
         <button type="submit">Subir y Cargar</button>
     </form>
 </div>
-
-</body>
 
 {% endblock %}

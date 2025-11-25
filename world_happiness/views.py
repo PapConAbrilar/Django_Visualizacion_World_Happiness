@@ -2,13 +2,15 @@ import plotly.express as px
 import plotly.offline as opy
 import plotly.graph_objects as go
 from pycountry_convert import country_name_to_country_alpha3 # pip install pycountry-convert
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
+from django.db.models import Q
 import numpy as np
 import pandas as pd
 import json
 from world_happiness.utils import cargar_csv
 from decimal import Decimal
 from world_happiness.models import Pais, Region
+from world_happiness.forms import PaisForm
 from decimal import Decimal, InvalidOperation
 from django.contrib import messages
 from django.shortcuts import redirect
@@ -107,7 +109,6 @@ def happiness(request):
         })
 
 
-
 def economy(request):
     paises_qs = Pais.objects.select_related('id_region').all()
 
@@ -127,7 +128,6 @@ def economy(request):
     }
 
     return render(request, 'world_happiness/economy.html', context)
-
 
 
 def trust(request):
@@ -249,14 +249,9 @@ def dashboard_interactivo(request):
         'datos_json': json.dumps(datos_list),
         'regiones': list(regiones),
         'metricas': metricas,
-        'active_page': 'dashboard'
+        'active_page':'dashboard'
     }
     return render(request, 'world_happiness/dashboard.html', context)
-# bibliografia rapida
-"""
-https://www.coding2go.com/sidebar-menu
-"""
-
 
 
 def agregar_pais(request):
@@ -269,7 +264,8 @@ def agregar_pais(request):
         if Pais.objects.filter(nombre=nombre_pais).exists():
             messages.error(request, f"El país '{nombre_pais}' ya existe en la base de datos.")
             return render(request, "world_happiness/agregar_pais.html", {
-                "regiones": regiones
+                "regiones": regiones,
+                "active_page":"agregar_pais"
             })
         
         try:
@@ -302,7 +298,8 @@ def agregar_pais(request):
             messages.error(request, f"Error inesperado: {str(e)}")
 
     return render(request, "world_happiness/agregar_pais.html", {
-        "regiones": regiones
+        "regiones": regiones,
+        "active_page":"agregar_pais"
     })
 
 
@@ -346,11 +343,12 @@ def cargar_csv(df):
     
     return paises_creados, paises_actualizados
 
+
 def agregar_pais_csv(request):
     if request.method == "POST":
         if "csv_file" not in request.FILES:
             messages.error(request, "Debe seleccionar un archivo.")
-            return render(request, "world_happiness/agregar_pais_csv.html")
+            return render(request, "world_happiness/agregar_pais_csv.html", {"active_page":"agregar_pais_csv"})
 
         try:
             csv_file = request.FILES["csv_file"]
@@ -358,7 +356,7 @@ def agregar_pais_csv(request):
             # Validar extensión del archivo
             if not csv_file.name.endswith('.csv'):
                 messages.error(request, "El archivo debe ser un CSV.")
-                return render(request, "world_happiness/agregar_pais_csv.html")
+                return render(request, "world_happiness/agregar_pais_csv.html", {"active_page":"agregar_pais_csv"})
             
             df = pd.read_csv(csv_file)
 
@@ -371,7 +369,7 @@ def agregar_pais_csv(request):
 
             if not all(col in df.columns for col in columnas_esperadas):
                 messages.error(request, "El CSV no tiene el formato correcto.")
-                return render(request, "world_happiness/agregar_pais_csv.html")
+                return render(request, "world_happiness/agregar_pais_csv.html", {"active_page":"agregar_pais_csv"})
 
             paises_creados, paises_actualizados = cargar_csv(df)
             
@@ -384,9 +382,79 @@ def agregar_pais_csv(request):
 
         except Exception as e:
             messages.error(request, f"Error procesando el archivo: {str(e)}")
-            return render(request, "world_happiness/agregar_pais_csv.html")
+            return render(request, "world_happiness/agregar_pais_csv.html", {"active_page":"agregar_pais_csv"})
 
-    return render(request, "world_happiness/agregar_pais_csv.html")
+    return render(request, "world_happiness/agregar_pais_csv.html", {"active_page":"agregar_pais_csv"})
+
+
+@login_required
+def pais_list(request):
+    """Vista centralizada para consultar y crear países."""
+    paises = Pais.objects.select_related("id_region").order_by("nombre")
+    form = PaisForm(request.POST or None)
+    
+    # Handle search query
+    search_query = request.GET.get("search", "")
+    if search_query:
+        paises = paises.filter(
+            Q(nombre__icontains=search_query) | Q(id_region__nombre__icontains=search_query)
+        )
+
+    if request.method == "POST":
+        if form.is_valid():
+            form.save()
+            messages.success(request, "País agregado correctamente.")
+            return redirect("pais_list")
+        else:
+            messages.error(request, "Revisa los datos del formulario.")
+
+    context = {
+        "paises": paises,
+        "form": form,
+        "active_page": "crud",
+        "search_query": search_query,
+    }
+    return render(request, "world_happiness/pais_list.html", context)
+
+
+@login_required
+def pais_update(request, pk):
+    pais = get_object_or_404(Pais, pk=pk)
+
+    if request.method == "POST":
+        form = PaisForm(request.POST, instance=pais)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"País '{pais.nombre}' actualizado correctamente.")
+            return redirect("pais_list")
+    else:
+        form = PaisForm(instance=pais)
+
+    context = {
+        "form": form,
+        "pais": pais,
+        "active_page": "crud",
+        "is_edit": True,
+    }
+    return render(request, "world_happiness/pais_form.html", context)
+
+
+@login_required
+def pais_delete(request, pk):
+    pais = get_object_or_404(Pais, pk=pk)
+
+    if request.method == "POST":
+        nombre = pais.nombre
+        pais.delete()
+        messages.success(request, f"País '{nombre}' eliminado.")
+        return redirect("pais_list")
+
+    context = {
+        "pais": pais,
+        "active_page": "crud",
+    }
+    return render(request, "world_happiness/pais_confirm_delete.html", context)
+
 
 def inicio(request):
     return render(request, 'inicio.html')

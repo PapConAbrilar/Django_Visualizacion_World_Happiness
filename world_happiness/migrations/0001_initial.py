@@ -38,6 +38,3 @@ class Migration(migrations.Migration):
             ],
         ),
     ]
-
-
-# quicksort algorithm
