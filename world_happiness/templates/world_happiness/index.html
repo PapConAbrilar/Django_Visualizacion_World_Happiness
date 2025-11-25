@@ -4,6 +4,14 @@
 
 {% block container %}
 
+{% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+      <li class="{{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
 <h2>Bienvenido a una visualización de las métricas más importantes del World Happiness Report (WHR) del año 2015.</h2>
 <br>
 <img src="{% static 'img/gato.jpg' %}" alt="Logo">

@@ -18,16 +18,17 @@ from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from world_happiness import views
+from world_happiness.views import CustomLoginView, CustomLogoutView
 
 urlpatterns = [
     path(
         'login/',
-         auth_views.LoginView.as_view(template_name='login.html'),
+         CustomLoginView.as_view(),
          name='login'
          ),
     path(
         'logout/',
-        auth_views.LogoutView.as_view(),
+        CustomLogoutView.as_view(),
         name='logout'
         ),
     path('', views.inicio, name='inicio'),

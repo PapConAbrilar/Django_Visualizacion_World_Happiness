@@ -1,0 +1,113 @@
+{% extends 'world_happiness/base.html' %}
+
+{% block container %}
+<section class="crud-header">
+  <h1>Administrar países</h1>
+  <p>Consulta los registros existentes y agrega nuevos países con sus indicadores.</p>
+</section>
+
+{% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+      <li class="{{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+<div class="crud-container">
+  <div class="crud-table">
+    <div class="table-header">
+      <div>
+        <h2>Listado actual</h2>
+        {% if search_query %}
+          <p class="search-results">Se encontraron {{ paises|length }} resultado{{ paises|length|pluralize }} para "{{ search_query }}"</p>
+        {% endif %}
+      </div>
+      <form method="get" class="search-form">
+        <input 
+          type="text" 
+          name="search" 
+          placeholder="Buscar por país o región..." 
+          value="{{ search_query }}"
+          class="search-input"
+        >
+        <button type="submit" class="btn btn-search">Buscar</button>
+        {% if search_query %}
+          <a href="{% url 'pais_list' %}" class="btn btn-clear">Limpiar</a>
+        {% endif %}
+      </form>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>País</th>
+            <th>Región</th>
+            <th>Happiness</th>
+            <th>Economy</th>
+            <th>Family</th>
+            <th>Health</th>
+            <th>Freedom</th>
+            <th>Generosity</th>
+            <th>Trust</th>
+            <th>Dystopia</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pais in paises %}
+          <tr>
+            <td>{{ pais.nombre }}</td>
+            <td>{{ pais.id_region.nombre }}</td>
+            <td>{{ pais.happiness_score|floatformat:3 }}</td>
+            <td>{{ pais.economy|floatformat:3 }}</td>
+            <td>{{ pais.family|floatformat:3 }}</td>
+            <td>{{ pais.health|floatformat:3 }}</td>
+            <td>{{ pais.freedom|floatformat:3 }}</td>
+            <td>{{ pais.generosity|floatformat:3 }}</td>
+            <td>{{ pais.trust|floatformat:3 }}</td>
+            <td>{{ pais.dystopia|floatformat:3 }}</td>
+            <td class="actions">
+              <a class="btn btn-secondary" href="{% url 'pais_update' pais.pk %}">Editar</a>
+              <a class="btn btn-danger" href="{% url 'pais_delete' pais.pk %}">Eliminar</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="11">
+              {% if search_query %}
+                No se encontraron países que coincidan con "{{ search_query }}".
+              {% else %}
+                No hay países cargados aún.
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="crud-form">
+    <h2>Agregar país</h2>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      {% for field in form %}
+      <div class="form-group">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}
+          <small>{{ field.help_text }}</small>
+        {% endif %}
+        {% for error in field.errors %}
+          <span class="error">{{ error }}</span>
+        {% endfor %}
+      </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary">Guardar</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+

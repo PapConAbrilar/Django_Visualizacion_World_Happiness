@@ -2,18 +2,19 @@
 
 {% block container %}
 
-<head>
-    <title>Agregar País</title>
-</head>
-<body>
-
-{% if msg %}
-    <div class="msg">{{ msg }}</div>
-{% endif %}
-
-<form method="POST">
-    {% csrf_token %}
+<div class="container">
     <h2>Agregar País Manualmente</h2>
+
+    {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    <form method="POST">
+    {% csrf_token %}
 
     <label>Nombre del país</label>
     <input type="text" name="nombre" required>
@@ -54,8 +55,7 @@
 
     <label></label>
     <button type="submit">Agregar País</button>
-</form>
-
-</body>
+    </form>
+</div>
 
 {% endblock %}
